@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script>
+  (function() {
+    var url = new URL(window.location.href);
+    var serverUrl = url.searchParams.get('server') || 'http://127.0.0.1:4173';
+    window.location.replace(serverUrl + '/app');
+  })();
+</script>
+</head>
+<body style="background:#071126;display:flex;align-items:center;justify-content:center;height:100vh;margin:0">
+  <div style="color:#4DC8F0;font-family:-apple-system,sans-serif;font-size:14px">Loading Beta...</div>
+</body>
+</html>
