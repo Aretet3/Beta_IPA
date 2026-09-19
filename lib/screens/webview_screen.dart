@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:share_plus/share_plus.dart';
 import '../services/auth_service.dart';
 import '../config/app_config.dart';
 
@@ -25,7 +24,7 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
   int _loadProgress = 0;
   DateTime? _lastBackPressed;
   final Connectivity _connectivity = Connectivity();
-  StreamSubscription<List<ConnectivityResult>>? _connectivitySub;
+  StreamSubscription<ConnectivityResult>? _connectivitySub;
 
   @override
   void initState() {
@@ -36,10 +35,8 @@ class _WebViewScreenState extends State<WebViewScreen> with WidgetsBindingObserv
   }
 
   void _listenConnectivity() {
-    _connectivitySub = _connectivity.onConnectivityChanged.listen((results) {
-      final hasConnection =
-          results.any((r) => r != ConnectivityResult.none);
-      if (hasConnection && _hasError) {
+    _connectivitySub = _connectivity.onConnectivityChanged.listen((result) {
+      if (result != ConnectivityResult.none && _hasError) {
         _reload();
       }
     });

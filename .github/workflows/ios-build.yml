@@ -17,19 +17,32 @@ jobs:
           channel: 'stable'
           architecture: x64
 
-      - name: Flutter info
+      - name: Flutter doctor
         run: flutter doctor -v
+
+      - name: Generate iOS project
+        run: |
+          flutter create --platforms=ios --org com.beta --project-name beta_messenger .
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: CocoaPods install
+      - name: Apply custom iOS config
+        run: |
+          cp ios/custom/Info.plist ios/Runner/Info.plist
+          cp ios/custom/AppDelegate.swift ios/Runner/AppDelegate.swift
+          cp ios/custom/Podfile ios/Podfile
+          cp ios/custom/Runner-Bridging-Header.h ios/Runner/Runner-Bridging-Header.h
+          cp ios/custom/DebugProfile.entitlements ios/Runner/DebugProfile.entitlements
+          cp ios/custom/Release.entitlements ios/Runner/Release.entitlements
+
+      - name: Install pods
         working-directory: ios
         run: |
           pod repo update
           pod install
 
-      - name: Build iOS (no codesign)
+      - name: Build iOS
         run: flutter build ios --release --no-codesign
 
       - name: Create IPA
