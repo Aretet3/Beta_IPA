@@ -21,8 +21,65 @@ jobs:
         run: flutter doctor -v
 
       - name: Generate iOS project
+        run: flutter create --platforms=ios --org com.beta --project-name beta_messenger .
+
+      - name: Create shared Xcode scheme with correct UUIDs
         run: |
-          flutter create --platforms=ios --org com.beta --project-name beta_messenger .
+          PROJ="ios/Runner.xcodeproj/project.pbxproj"
+          RUNNER_UUID=$(grep -m1 'isa = PBXNativeTarget' -B5 "$PROJ" | grep -o '[A-F0-9]\{24\}' | head -1)
+          TESTS_UUID=$(grep -m1 'isa = PBXNativeTarget' -A5 "$PROJ" | grep -o '[A-F0-9]\{24\}' | tail -1)
+
+          if [ -z "$RUNNER_UUID" ]; then
+            RUNNER_UUID="73F3B21E2505FCAE00AE9609"
+          fi
+          if [ -z "$TESTS_UUID" ]; then
+            TESTS_UUID="73F3B21F2505FCAE00AE9609"
+          fi
+
+          echo "Runner UUID: $RUNNER_UUID"
+          echo "Tests UUID: $TESTS_UUID"
+
+          SCHEME_DIR="ios/Runner.xcodeproj/xcshareddata/xcschemes"
+          mkdir -p "$SCHEME_DIR"
+
+          cat > "$SCHEME_DIR/Runner.xcscheme" << XCSHEME_EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <Scheme LastUpgradeVersion="1500" version="1.3">
+            <BuildAction parallelizeBuildables="YES" buildImplicitDependencies="YES">
+              <BuildActionEntries>
+                <BuildActionEntry buildForTesting="YES" buildForRunning="YES" buildForProfiling="YES" buildForArchiving="YES" buildForAnalyzing="YES">
+                  <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="$RUNNER_UUID" BuildableName="Runner.app" BlueprintName="Runner" ReferencedContainer="container:Runner.xcodeproj"/>
+                </BuildActionEntry>
+              </BuildActionEntries>
+            </BuildAction>
+            <TestAction buildConfiguration="Debug" selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.DebuggerFoundation.Launcher.LLDB" shouldUseLaunchSchemeArgsEnv="YES" codeCoverageEnabled="NO">
+              <Testables>
+                <TestableReference skipped="NO">
+                  <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="$TESTS_UUID" BuildableName="RunnerTests.xctest" BlueprintName="RunnerTests" ReferencedContainer="container:Runner.xcodeproj"/>
+                </TestableReference>
+              </Testables>
+              <MacroExpansion>
+                <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="$RUNNER_UUID" BuildableName="Runner.app" BlueprintName="Runner" ReferencedContainer="container:Runner.xcodeproj"/>
+              </MacroExpansion>
+            </TestAction>
+            <LaunchAction buildConfiguration="Debug" selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.DebuggerFoundation.Launcher.LLDB" launchStyle="0" useCustomWorkingDirectory="NO" ignoresPersistentStateOnLaunch="NO" debugDocumentVersioning="YES" debugServiceExtension="internal" allowLocationSimulation="YES">
+              <BuildableProductRunnable runnableDebuggingMode="0">
+                <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="$RUNNER_UUID" BuildableName="Runner.app" BlueprintName="Runner" ReferencedContainer="container:Runner.xcodeproj"/>
+              </BuildableProductRunnable>
+              <AdditionalOptions/>
+            </LaunchAction>
+            <ProfileAction buildConfiguration="Profile" shouldUseLaunchSchemeArgsEnv="YES" savedToolIdentifier="" useCustomWorkingDirectory="NO" debugDocumentVersioning="YES">
+              <BuildableProductRunnable runnableDebuggingMode="0">
+                <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="$RUNNER_UUID" BuildableName="Runner.app" BlueprintName="Runner" ReferencedContainer="container:Runner.xcodeproj"/>
+              </BuildableProductRunnable>
+            </ProfileAction>
+            <AnalyzeAction buildConfiguration="Debug"/>
+            <ArchiveAction buildConfiguration="Release" revealArchiveInOrganizer="YES"/>
+          </Scheme>
+          XCSHEME_EOF
+
+          echo "=== Shared scheme created ==="
+          cat "$SCHEME_DIR/Runner.xcscheme"
 
       - name: Install dependencies
         run: flutter pub get
