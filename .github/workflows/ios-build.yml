@@ -20,21 +20,24 @@ jobs:
       - name: Flutter doctor
         run: flutter doctor -v
 
-      - name: Generate iOS project
-        run: flutter create --platforms=ios --org com.beta --project-name beta_messenger .
+      - name: Create clean iOS project
+        run: |
+          rm -rf ios
+          flutter create --platforms=ios --org com.beta --project-name beta_messenger .
+          ls -la ios/Runner.xcodeproj/
 
       - name: Apply custom iOS config
         run: |
-          cp ios/custom/Info.plist ios/Runner/Info.plist
-          cp ios/custom/AppDelegate.swift ios/Runner/AppDelegate.swift
-          cp ios/custom/Runner-Bridging-Header.h ios/Runner/Runner-Bridging-Header.h
-          cp ios/custom/DebugProfile.entitlements ios/Runner/DebugProfile.entitlements
-          cp ios/custom/Release.entitlements ios/Runner/Release.entitlements
-          cp ios/custom/Podfile ios/Podfile
+          cp ios_custom/Info.plist ios/Runner/Info.plist
+          cp ios_custom/AppDelegate.swift ios/Runner/AppDelegate.swift
+          cp ios_custom/Runner-Bridging-Header.h ios/Runner/Runner-Bridging-Header.h
+          cp ios_custom/DebugProfile.entitlements ios/Runner/DebugProfile.entitlements
+          cp ios_custom/Release.entitlements ios/Runner/Release.entitlements
+          cp ios_custom/Podfile ios/Podfile
           mkdir -p ios/Runner.xcodeproj/xcshareddata/xcschemes
-          cp ios/custom/Runner.xcscheme ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
-          echo "=== Shared scheme installed ==="
-          cat ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
+          cp ios_custom/Runner.xcscheme ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
+          echo "=== Done ==="
+          ls -la ios/Runner.xcodeproj/xcshareddata/xcschemes/
 
       - name: Install dependencies
         run: flutter pub get
